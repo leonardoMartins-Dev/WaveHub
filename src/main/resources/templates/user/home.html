@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${(#strings.isEmpty(selectedState) ? selectedCountry : selectedState) + ' · WaveHub'}">Explorar · WaveHub</title>
+    <th:block th:replace="~{user/fragments :: head-assets}"></th:block>
+</head>
+<body class="page-explore">
+
+<header th:replace="~{user/fragments :: topbar}"></header>
+
+<main class="shell">
+
+    <!-- =====================================================
+         LUGAR SINTONIZADO + BUSCA
+         ===================================================== -->
+    <section class="hero" th:classappend="${clima != null} ? 'has-weather'">
+        <p class="caps hero-eyebrow">
+            <span th:text="${#strings.isEmpty(selectedState)} ? 'Todos os estados' : ${selectedCountry}">Brazil</span>
+            <span aria-hidden="true">·</span>
+            <span th:text="${#lists.size(stations) == 1} ? '1 estação' : ${#numbers.formatInteger(#lists.size(stations), 1, 'POINT')} + ' estações'">0 estações</span>
+        </p>
+
+        <h1 class="hero-title"
+            th:text="${#strings.isEmpty(selectedState)} ? ${selectedCountry} : ${selectedState}">Minas Gerais</h1>
+
+        <!-- =====================================================
+             CLIMA AGORA (WeatherAPI). A cidade é a da estação mais
+             bem colocada que tem localização (ver ClimaService).
+             ===================================================== -->
+        <aside class="weather" th:if="${clima != null}" aria-label="Clima agora">
+            <p class="caps weather-place"
+               th:text="'Clima em ' + ${clima.cidade()}"
+               th:title="${clima.cidade()} + ', ' + ${clima.regiao()} + ', ' + ${clima.pais()}">Clima em Belo Horizonte</p>
+
+            <div class="weather-now">
+                <img th:src="${clima.icone()}" alt="" width="64" height="64">
+                <p class="weather-temp" th:text="${clima.temperatura()} + '°'">24°</p>
+            </div>
+            <p class="weather-cond" th:text="${clima.condicao()}">Ensolarado</p>
+
+            <p class="weather-details">
+                <span>Sensação <strong th:text="${clima.sensacao()} + '°'">26°</strong></span>
+                <span>Umidade <strong th:text="${clima.umidade()} + '%'">60%</strong></span>
+                <span>Vento <strong th:text="${clima.ventoKmh()} + ' km/h'">12 km/h</strong></span>
+                <span>Hora local <strong th:text="${clima.horaLocal()}">12:45</strong></span>
+            </p>
+        </aside>
+
+        <form class="tune" method="get" th:action="@{/home}">
+            <label class="field">
+                <span class="caps">País</span>
+                <span class="select">
+                    <select name="country">
+                        <option th:each="c : ${countries}"
+                                th:value="${c['name']}"
+                                th:text="${c['name'] + ' (' + c['stationcount'] + ')'}"
+                                th:selected="${c['name'] == selectedCountry}">
+                        </option>
+                    </select>
+                </span>
+            </label>
+
+            <label class="field">
+                <span class="caps">Estado</span>
+                <span class="select">
+                    <select name="state">
+                        <option value="" th:selected="${selectedState == null || selectedState.isEmpty()}">
+                            Todos os estados
+                        </option>
+                        <option th:each="s : ${states}"
+                                th:value="${s['name']}"
+                                th:text="${s['name'] + ' (' + s['stationcount'] + ')'}"
+                                th:selected="${s['name'] == selectedState}">
+                        </option>
+                    </select>
+                </span>
+            </label>
+
+            <button type="submit" class="btn-primary">Buscar</button>
+        </form>
+    </section>
+
+    <!-- =====================================================
+         LISTA DE ESTAÇÕES (favoritas primeiro)
+         ===================================================== -->
+    <section aria-label="Estações">
+        <th:block th:unless="${#lists.isEmpty(stations)}">
+            <div class="list-head" aria-hidden="true">
+                <span></span><span></span>
+                <span class="caps">Estação</span>
+                <span class="caps">Local</span>
+                <span class="caps">Áudio</span>
+                <span class="caps">Popularidade</span>
+                <span></span><span></span>
+            </div>
+
+            <ul class="stations">
+                <th:block th:each="station : ${stations}">
+                    <li th:replace="~{user/fragments :: station(${station})}"></li>
+                </th:block>
+            </ul>
+        </th:block>
+
+        <div class="empty" th:if="${#lists.isEmpty(stations)}">
+            <p class="empty-title"
+               th:text="'Nenhuma estação encontrada em ' + (${#strings.isEmpty(selectedState)} ? ${selectedCountry} : ${selectedState})">
+                Nenhuma estação encontrada
+            </p>
+            <p>Escolha outro estado, ou “Todos os estados” para ver o país inteiro.</p>
+        </div>
+    </section>
+</main>
+
+<section th:replace="~{user/fragments :: dock}"></section>
+
+</body>
+</html>

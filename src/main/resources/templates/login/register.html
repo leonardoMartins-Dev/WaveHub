@@ -1,0 +1,72 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Criar conta · WaveHub</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Anybody:ital,wdth,wght@0,75..150,400..900;1,75..150,400..900&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" th:href="@{/css/auth.css}" />
+  </head>
+
+  <body>
+    <main class="auth-layout">
+      <!-- =====================================================
+           LOGO
+           ===================================================== -->
+      <section class="auth-brand">
+        <img class="auth-logo" th:src="@{/imgs/teste.png}" alt="WaveHub" width="1536" height="1024" />
+        <p class="auth-tagline">Rádios ao vivo do mundo inteiro, num só lugar.</p>
+      </section>
+
+      <!-- =====================================================
+           FORMULÁRIO
+           ===================================================== -->
+      <section class="auth-panel">
+        <div class="auth-card">
+          <h1 class="auth-title">Criar conta</h1>
+          <p class="auth-lead">Suas estações favoritas ficam salvas na sua conta.</p>
+
+          <!-- E-mail já cadastrado (redirect:/register?erro=usuario) -->
+          <p th:if="${param.erro}" class="notice notice--error" role="alert">
+            Já existe uma conta com este e-mail. Entre com ele ou recupere a senha.
+          </p>
+
+          <form th:action="@{/register}" method="post" class="auth-form">
+            <label class="field">
+              <span class="caps">Nome</span>
+              <input type="text" name="nome" autocomplete="name" required />
+            </label>
+
+            <label class="field">
+              <span class="caps">E-mail</span>
+              <input
+                type="email"
+                name="email"
+                placeholder="voce@exemplo.com"
+                autocomplete="email"
+                required
+              />
+            </label>
+
+            <label class="field">
+              <span class="caps">Senha</span>
+              <input type="password" name="senha" autocomplete="new-password" required />
+            </label>
+
+            <button type="submit" class="btn-primary">Criar conta</button>
+          </form>
+
+          <p class="auth-links">
+            <span>Já tem conta? <a th:href="@{/login}">Entrar</a></span>
+          </p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

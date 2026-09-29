@@ -1,0 +1,7 @@
+target/
+.env
+.vscode/
+.idea/
+imgs/
+backup-design-antigo/
+*.md

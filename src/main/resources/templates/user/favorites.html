@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favoritas · WaveHub</title>
+    <th:block th:replace="~{user/fragments :: head-assets}"></th:block>
+</head>
+<body class="page-favorites">
+
+<header th:replace="~{user/fragments :: topbar}"></header>
+
+<main class="shell">
+
+    <!-- =====================================================
+         RESUMO DAS FAVORITAS
+         ===================================================== -->
+    <section class="hero">
+        <p class="caps hero-eyebrow" th:unless="${#lists.isEmpty(stations)}">
+            <span th:text="${#lists.size(stations) == 1} ? '1 estação' : ${#lists.size(stations)} + ' estações'">0 estações</span>
+            <span aria-hidden="true">·</span>
+            <span th:text="${countryCount == 1} ? '1 país' : ${countryCount} + ' países'">0 países</span>
+        </p>
+
+        <h1 class="hero-title">Suas favoritas</h1>
+    </section>
+
+    <!-- =====================================================
+         LISTA (mais recentes primeiro, de qualquer país/estado)
+         ===================================================== -->
+    <section aria-label="Estações favoritas">
+        <th:block th:unless="${#lists.isEmpty(stations)}">
+            <div class="list-head" aria-hidden="true">
+                <span></span><span></span>
+                <span class="caps">Estação</span>
+                <span class="caps">Local</span>
+                <span class="caps">Áudio</span>
+                <span class="caps">Popularidade</span>
+                <span></span><span></span>
+            </div>
+
+            <ul class="stations">
+                <th:block th:each="station : ${stations}">
+                    <li th:replace="~{user/fragments :: station(${station})}"></li>
+                </th:block>
+            </ul>
+        </th:block>
+
+        <div class="empty" th:if="${#lists.isEmpty(stations)}">
+            <p class="empty-title">Nenhuma favorita ainda</p>
+            <p>Toque na estrela de uma estação em Explorar para guardá-la aqui. Estações de países e estados diferentes aparecem juntas nesta lista.</p>
+            <a class="btn-primary" th:href="@{/home}">Explorar estações</a>
+        </div>
+    </section>
+</main>
+
+<section th:replace="~{user/fragments :: dock}"></section>
+
+</body>
+</html>

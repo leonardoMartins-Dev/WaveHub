@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <!-- =====================================================
+         FONTES, CSS E JS DAS PÁGINAS LOGADAS
+         ===================================================== -->
+    <th:block th:fragment="head-assets">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anybody:ital,wdth,wght@0,75..150,400..900;1,75..150,400..900&family=Doto:wght@600..900&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+        <link rel="stylesheet" th:href="@{/css/style.css}">
+        <script th:src="@{/js/app.js}" defer></script>
+    </th:block>
+</head>
+<body>
+
+<!-- =====================================================
+     CABEÇALHO COM AS ABAS (Explorar / Favoritas)
+     ===================================================== -->
+<header class="topbar" th:fragment="topbar">
+    <div class="topbar-inner">
+        <a class="wordmark" th:href="@{/home}">Wave<span>Hub</span></a>
+
+        <nav class="tabs" aria-label="Seções">
+            <a class="tab" th:href="@{/home}"
+               th:classappend="${page == 'explore'} ? 'is-active'"
+               th:aria-current="${page == 'explore'} ? 'page'">Explorar</a>
+
+            <a class="tab" th:href="@{/favorites}"
+               th:classappend="${page == 'favorites'} ? 'is-active'"
+               th:aria-current="${page == 'favorites'} ? 'page'">
+                Favoritas
+                <span class="tab-count" data-fav-count th:text="${favoriteCount}">0</span>
+            </a>
+        </nav>
+
+        <!-- Busca pelo nome da rádio, em qualquer país -->
+        <form class="search" role="search" method="get" th:action="@{/search}">
+            <input type="search" name="q"
+                   placeholder="Buscar rádio pelo nome"
+                   aria-label="Buscar rádio pelo nome, em qualquer país"
+                   autocomplete="off" required minlength="2"
+                   th:value="${searchQuery}">
+            <button type="submit" aria-label="Buscar">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>
+            </button>
+        </form>
+
+        <div class="account">
+            <span class="account-name" th:text="${userName}">Usuário</span>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn-quiet">Sair</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<!-- =====================================================
+     LINHA DE ESTAÇÃO (usada em Explorar e Favoritas)
+     O áudio não fica na linha: o botão ▶ manda a estação
+     para o player único no rodapé.
+     ===================================================== -->
+<li class="station" th:fragment="station(station)"
+    th:classappend="${station.favorite} ? 'is-fav'"
+    th:data-name="${station.name}"
+    th:data-src="${#strings.isEmpty(station.urlResolved)} ? ${station.url} : ${station.urlResolved}">
+
+    <button type="button" class="play" th:aria-label="'Ouvir ' + ${station.name}">
+        <svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.6v10.8l8.8-5.4z"/></svg>
+        <svg class="icon-stop" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="3.5" width="9" height="9" rx="1.2"/></svg>
+        <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
+    </button>
+
+    <div class="station-art">
+        <img th:src="${station.favicon}" alt="" width="44" height="44"
+             loading="lazy" decoding="async" referrerpolicy="no-referrer"
+             onerror="this.onerror=null; this.src='/imgs/aradio.webp';">
+        <span class="signal"
+              th:classappend="${station.lastcheckok == 1} ? 'is-up' : 'is-down'"
+              th:title="${station.lastcheckok == 1} ? 'No ar na última verificação' : 'Fora do ar na última verificação'">
+            <span class="visually-hidden" th:text="${station.lastcheckok == 1} ? 'No ar' : 'Fora do ar'"></span>
+        </span>
+    </div>
+
+    <div class="station-id">
+        <p class="station-name" th:text="${station.name}">Estação</p>
+        <p class="station-tags"
+           th:if="${!#strings.isEmpty(station.tags)}"
+           th:text="${#strings.replace(station.tags, ',', ' · ')}"></p>
+    </div>
+
+    <div class="station-place">
+        <p class="place-main">
+            <span class="cc" th:if="${!#strings.isEmpty(station.countrycode)}" th:text="${station.countrycode}">BR</span>
+            <span class="place-name" th:text="${#strings.isEmpty(station.state)} ? ${station.country} : ${station.state}">Estado</span>
+        </p>
+        <p class="place-lang" th:if="${!#strings.isEmpty(station.language)}" th:text="${station.language}">idioma</p>
+    </div>
+
+    <div class="station-audio">
+        <span class="chip"
+              th:text="${(#strings.isEmpty(station.codec) ? '—' : #strings.toUpperCase(station.codec)) + (station.bitrate > 0 ? ' · ' + station.bitrate + 'k' : '')}">MP3 · 128k</span>
+    </div>
+
+    <div class="station-pop">
+        <p class="votes"><span th:text="${#numbers.formatInteger(station.votes, 1, 'POINT')}">0</span> votos</p>
+        <p class="trend is-up" th:if="${station.clicktrend > 0}"
+           th:title="${station.clickcount} + ' cliques nas últimas 24h'"
+           th:text="'▲ ' + ${station.clicktrend}"></p>
+        <p class="trend is-down" th:if="${station.clicktrend < 0}"
+           th:title="${station.clickcount} + ' cliques nas últimas 24h'"
+           th:text="'▼ ' + ${-station.clicktrend}"></p>
+        <p class="trend is-flat" th:if="${station.clicktrend == 0}"
+           th:title="${station.clickcount} + ' cliques nas últimas 24h'">—</p>
+    </div>
+
+    <div class="station-links">
+        <a th:if="${!#strings.isEmpty(station.homepage)}"
+           th:href="${station.homepage}" target="_blank" rel="noopener"
+           title="Site da estação" th:aria-label="'Site de ' + ${station.name}">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3h7v7M13 3 4 12"/></svg>
+        </a>
+        <a th:if="${station.geoLat != null and station.geoLat != 0}"
+           th:href="'https://www.google.com/maps?q=' + ${station.geoLat} + ',' + ${station.geoLong}"
+           target="_blank" rel="noopener"
+           title="Ver no mapa" th:aria-label="'Ver ' + ${station.name} + ' no mapa'">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14.5s4.5-4.2 4.5-7.8a4.5 4.5 0 0 0-9 0c0 3.6 4.5 7.8 4.5 7.8Z"/><circle cx="8" cy="6.7" r="1.6"/></svg>
+        </a>
+    </div>
+
+    <!-- Funciona sem JavaScript (envia o formulário); com JavaScript, o app.js
+         usa o data-api e troca a estrela sem recarregar a página -->
+    <form class="fav-form" method="post"
+          th:action="@{/favorites/toggle}" th:data-api="@{/api/favorites/toggle}">
+        <input type="hidden" name="stationuuid" th:value="${station.stationuuid}">
+        <input type="hidden" name="country" th:value="${selectedCountry}">
+        <input type="hidden" name="state" th:value="${selectedState}">
+        <input type="hidden" name="from" th:value="${page}">
+        <input type="hidden" name="q" th:value="${searchQuery}">
+        <button type="submit" class="fav"
+                th:aria-pressed="${station.favorite}"
+                th:aria-label="${station.favorite} ? 'Remover ' + ${station.name} + ' das favoritas' : 'Adicionar ' + ${station.name} + ' às favoritas'">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.3 2.7 5.5 6 .9-4.4 4.2 1 6-5.3-2.8-5.3 2.8 1-6-4.4-4.2 6-.9z"/></svg>
+        </button>
+    </form>
+</li>
+
+<!-- =====================================================
+     PLAYER ÚNICO NO RODAPÉ, COM VISOR VFD
+     ===================================================== -->
+<section class="dock" th:fragment="dock" aria-label="Player" data-state="idle">
+    <div class="dock-inner">
+        <button type="button" class="dock-toggle" data-dock-toggle aria-label="Ouvir" disabled>
+            <svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.6v10.8l8.8-5.4z"/></svg>
+            <svg class="icon-stop" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="3.5" width="9" height="9" rx="1.2"/></svg>
+        </button>
+
+        <img class="dock-art" data-dock-art th:src="@{/imgs/aradio.webp}" alt="" width="52" height="52">
+
+        <div class="vfd">
+            <div class="vfd-text" aria-live="polite">
+                <p class="vfd-status" data-dock-status>Pronto</p>
+                <p class="vfd-name"><span data-dock-name>Escolha uma estação</span></p>
+                <p class="vfd-meta" data-dock-meta>Aperte ▶ em qualquer estação da lista</p>
+            </div>
+            <div class="vfd-meter" aria-hidden="true">
+                <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+        </div>
+
+        <label class="dock-volume">
+            <span class="caps">Volume</span>
+            <input type="range" min="0" max="100" value="80" data-dock-volume>
+        </label>
+    </div>
+
+    <audio data-dock-audio preload="none"></audio>
+</section>
+
+</body>
+</html>

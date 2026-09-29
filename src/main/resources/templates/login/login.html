@@ -1,0 +1,107 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Entrar · WaveHub</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Anybody:ital,wdth,wght@0,75..150,400..900;1,75..150,400..900&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" th:href="@{/css/auth.css}" />
+
+    <!-- Google reCAPTCHA -->
+    <script src="https://www.google.com/recaptcha/api.js?hl=pt-BR" async defer></script>
+  </head>
+
+  <body>
+    <main class="auth-layout">
+      <!-- =====================================================
+           LOGO
+           ===================================================== -->
+      <section class="auth-brand">
+        <img class="auth-logo" th:src="@{/imgs/teste.png}" alt="WaveHub" width="1536" height="1024" />
+        <p class="auth-tagline">Rádios ao vivo do mundo inteiro, num só lugar.</p>
+      </section>
+
+      <!-- =====================================================
+           FORMULÁRIO
+           ===================================================== -->
+      <section class="auth-panel">
+        <div class="auth-card">
+          <h1 class="auth-title">Entrar</h1>
+
+          <!-- Avisos vindos de outras telas (parâmetros na URL) -->
+          <p th:if="${param.cadastro}" class="notice notice--ok" role="status">
+            Conta criada. Entre com seu e-mail e senha.
+          </p>
+          <p th:if="${param.senha}" class="notice notice--ok" role="status">
+            Senha alterada. Entre com a nova senha.
+          </p>
+          <p th:if="${param.logout}" class="notice notice--ok" role="status">
+            Você saiu da sua conta.
+          </p>
+          <p th:if="${param.captcha}" class="notice notice--error" role="alert">
+            Marque “Não sou um robô” antes de entrar.
+          </p>
+          <p th:if="${param.erro}" class="notice notice--error" role="alert">
+            O link de redefinição expirou ou já foi usado. Peça um novo em “Esqueci minha senha”.
+          </p>
+
+          <form th:action="@{/login}" method="post" class="auth-form">
+            <label class="field">
+              <span class="caps">E-mail</span>
+              <input
+                type="email"
+                name="username"
+                placeholder="voce@exemplo.com"
+                autocomplete="username"
+                required
+              />
+            </label>
+
+            <label class="field">
+              <span class="caps">Senha</span>
+              <input
+                type="password"
+                name="password"
+                autocomplete="current-password"
+                required
+              />
+            </label>
+
+            <div class="recaptcha">
+              <div
+                class="g-recaptcha"
+                data-theme="dark"
+                th:attr="data-sitekey=${recaptchaSiteKey}"
+              ></div>
+            </div>
+
+            <button type="submit" class="btn-primary">Entrar</button>
+          </form>
+
+          <p class="auth-links">
+            <a th:href="@{/register}">Criar conta</a>
+            <a th:href="@{/recoverpassword}">Esqueci minha senha</a>
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      // O reCAPTCHA tem largura fixa: escala para ficar da largura dos campos (ver auth.css)
+      (function () {
+        var caixa = document.querySelector(".recaptcha");
+        function ajustar() {
+          caixa.style.setProperty("--recaptcha-scale", Math.min(caixa.clientWidth / 300, 1.3));
+        }
+        ajustar();
+        window.addEventListener("resize", ajustar);
+      })();
+    </script>
+  </body>
+</html>

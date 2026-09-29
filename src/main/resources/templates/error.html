@@ -1,0 +1,50 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Erro · WaveHub</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Anybody:ital,wdth,wght@0,75..150,400..900;1,75..150,400..900&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" th:href="@{/css/auth.css}" />
+  </head>
+
+  <body>
+    <main class="auth-layout">
+      <!-- =====================================================
+           LOGO
+           ===================================================== -->
+      <section class="auth-brand">
+        <img class="auth-logo" th:src="@{/imgs/teste.png}" alt="WaveHub" width="1536" height="1024" />
+        <p class="auth-tagline">Rádios ao vivo do mundo inteiro, num só lugar.</p>
+      </section>
+
+      <!-- =====================================================
+           MENSAGEM DE ERRO
+           (login com senha errada também cai aqui)
+           ===================================================== -->
+      <section class="auth-panel">
+        <div class="auth-card">
+          <h1 class="auth-title">Não foi possível continuar</h1>
+
+          <p class="notice notice--error" role="alert" th:if="${erro != null}" th:text="${erro}">
+            Mensagem de erro
+          </p>
+          <p class="notice notice--error" role="alert" th:if="${erro == null}">
+            Se você estava entrando, confira o e-mail e a senha e tente de novo.
+          </p>
+
+          <p class="auth-links">
+            <a th:href="@{/login}">Voltar para o login</a>
+            <a th:href="@{/recoverpassword}">Recuperar senha</a>
+          </p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

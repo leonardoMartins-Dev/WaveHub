@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${#strings.isEmpty(searchQuery)} ? 'Buscar · WaveHub' : '“' + ${searchQuery} + '” · WaveHub'">Buscar · WaveHub</title>
+    <th:block th:replace="~{user/fragments :: head-assets}"></th:block>
+</head>
+<body class="page-search">
+
+<header th:replace="~{user/fragments :: topbar}"></header>
+
+<main class="shell">
+
+    <!-- =====================================================
+         O QUE FOI BUSCADO
+         ===================================================== -->
+    <section class="hero">
+        <p class="caps hero-eyebrow" th:unless="${#lists.isEmpty(stations)}">
+            <span>Busca em todos os países</span>
+            <span aria-hidden="true">·</span>
+            <span th:text="${#lists.size(stations) >= resultLimit} ? 'As ' + ${resultLimit} + ' mais votadas'
+                          : (${#lists.size(stations) == 1} ? '1 estação' : ${#lists.size(stations)} + ' estações')">0 estações</span>
+            <span aria-hidden="true">·</span>
+            <span th:text="${countryCount == 1} ? '1 país' : ${countryCount} + ' países'">0 países</span>
+        </p>
+
+        <h1 class="hero-title"
+            th:text="${#strings.isEmpty(searchQuery)} ? 'Buscar rádio' : '“' + ${searchQuery} + '”'">“itatiaia”</h1>
+    </section>
+
+    <!-- =====================================================
+         RESULTADOS (mais votadas primeiro)
+         ===================================================== -->
+    <section aria-label="Resultados da busca">
+        <th:block th:unless="${#lists.isEmpty(stations)}">
+            <div class="list-head" aria-hidden="true">
+                <span></span><span></span>
+                <span class="caps">Estação</span>
+                <span class="caps">Local</span>
+                <span class="caps">Áudio</span>
+                <span class="caps">Popularidade</span>
+                <span></span><span></span>
+            </div>
+
+            <ul class="stations">
+                <th:block th:each="station : ${stations}">
+                    <li th:replace="~{user/fragments :: station(${station})}"></li>
+                </th:block>
+            </ul>
+        </th:block>
+
+        <!-- Sem texto (ou só 1 letra) -->
+        <div class="empty" th:if="${#lists.isEmpty(stations) and #strings.length(searchQuery) < 2}">
+            <p class="empty-title">Digite o nome de uma rádio</p>
+            <p>Use a busca no topo da página com pelo menos 2 letras. A busca inclui estações de todos os países.</p>
+        </div>
+
+        <!-- Buscou e não achou -->
+        <div class="empty" th:if="${#lists.isEmpty(stations) and #strings.length(searchQuery) >= 2}">
+            <p class="empty-title" th:text="'Nenhuma rádio com “' + ${searchQuery} + '” no nome'">Nenhuma rádio encontrada</p>
+            <p>Confira a grafia ou tente só parte do nome, como “Itatiaia” em vez de “Rádio Itatiaia 95.7 FM”.</p>
+        </div>
+    </section>
+</main>
+
+<section th:replace="~{user/fragments :: dock}"></section>
+
+</body>
+</html>

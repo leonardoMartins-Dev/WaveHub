@@ -1,0 +1,322 @@
+/* ==========================================================================
+   WaveHub — páginas de acesso
+   (login, cadastro, recuperar senha, redefinir senha e erro)
+
+   Mesmo sistema visual das páginas logadas (ver style.css): azul-noite do
+   logo, rótulos "serigrafados" e título largo em itálico.
+   Metade esquerda: o logo. Metade direita: o formulário.
+   ========================================================================== */
+
+:root {
+    color-scheme: dark;
+
+    --night: #060913;
+    --console: #0c1224;
+    --console-raised: #121a33;
+    --line: #1c2645;
+    --line-strong: #2b3860;
+    --ink: #e8edff;
+    --ink-dim: #8d98be;
+    --signal: #3d8bff;
+    --signal-strong: #2563eb;
+    --vfd: #6cf3e8;
+    --up: #3ddc84;
+    --down: #ff5c6c;
+
+    --font-display: "Anybody", "Arial Narrow", sans-serif;
+    --font-body: "IBM Plex Sans", system-ui, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink);
+    background: var(--night);
+    -webkit-font-smoothing: antialiased;
+}
+
+p {
+    margin: 0;
+}
+
+:focus-visible {
+    outline: 2px solid var(--vfd);
+    outline-offset: 2px;
+}
+
+/* ==========================================================================
+   LAYOUT
+   ========================================================================== */
+
+.auth-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(400px, 1fr);
+    min-height: 100vh;
+}
+
+/* Lado do logo: o brilho azul continua o do próprio logo */
+.auth-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 48px;
+    overflow: hidden;
+    background:
+        radial-gradient(60% 55% at 50% 42%, rgba(61, 139, 255, 0.2), transparent 70%),
+        radial-gradient(40% 40% at 72% 72%, rgba(124, 92, 255, 0.12), transparent 70%),
+        #03050c;
+}
+
+/* O PNG tem fundo preto: "screen" deixa o preto transparente sobre o fundo */
+.auth-logo {
+    display: block;
+    width: min(100%, 620px);
+    height: auto;
+    mix-blend-mode: screen;
+}
+
+.auth-tagline {
+    max-width: 24ch;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 700;
+    font-stretch: 110%;
+    font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+    line-height: 1.2;
+    text-align: center;
+}
+
+.auth-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 40px;
+    border-left: 1px solid var(--line);
+    background: var(--console);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 380px;
+}
+
+/* ==========================================================================
+   TEXTOS
+   ========================================================================== */
+
+.auth-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 800;
+    font-stretch: 112%;
+    font-size: 2.6rem;
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+
+.auth-lead {
+    margin-top: 12px;
+    color: var(--ink-dim);
+}
+
+/* Rótulo "serigrafado" de painel */
+.caps {
+    font-family: var(--font-display);
+    font-stretch: 125%;
+    font-weight: 600;
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+}
+
+/* ==========================================================================
+   FORMULÁRIO
+   ========================================================================== */
+
+.auth-form {
+    display: grid;
+    gap: 18px;
+    margin-top: 28px;
+}
+
+.field {
+    display: grid;
+    gap: 8px;
+}
+
+.field input {
+    height: 48px;
+    padding: 0 14px;
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    background: var(--console-raised);
+    color: var(--ink);
+    font: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field input::placeholder {
+    color: #5d6890;
+}
+
+.field input:hover {
+    border-color: var(--ink-dim);
+}
+
+.field input:focus {
+    outline: none;
+    border-color: var(--vfd);
+    box-shadow: 0 0 0 3px rgba(108, 243, 232, 0.15);
+}
+
+/* --------------------------------------------------------------------------
+   reCAPTCHA
+   O widget do Google tem tamanho fixo (304×78) e, no tema escuro, sobra uma
+   borda branca de 2px do iframe. Aqui:
+   - a caixa corta o widget em 300×74 (some a borda branca e a cinza do Google);
+   - uma borda nossa é desenhada por cima, igual à dos campos;
+   - o script no login.html ajusta --recaptcha-scale para o widget ficar
+     exatamente da largura dos campos. Sem JavaScript, fica no tamanho normal.
+   -------------------------------------------------------------------------- */
+.recaptcha {
+    --recaptcha-scale: 1;
+    position: relative;
+    height: calc(74px * var(--recaptcha-scale));
+}
+
+.recaptcha .g-recaptcha {
+    width: 300px;
+    height: 74px;
+    overflow: hidden;
+    border-radius: 8px;
+    transform: scale(var(--recaptcha-scale));
+    transform-origin: left top;
+}
+
+.recaptcha .g-recaptcha > div {
+    margin: -1px 0 0 -1px;
+}
+
+.recaptcha::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    pointer-events: none;
+}
+
+.btn-primary {
+    width: 100%;
+    height: 48px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--signal-strong);
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn-primary:hover {
+    background: #3874f0;
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+.auth-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin-top: 24px;
+    color: var(--ink-dim);
+    font-size: 0.9rem;
+}
+
+.auth-links a {
+    color: var(--signal);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+}
+
+/* ==========================================================================
+   AVISOS (sucesso e erro)
+   ========================================================================== */
+
+.notice {
+    margin-top: 20px;
+    padding: 12px 14px;
+    border: 1px solid;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.notice--ok {
+    border-color: rgba(61, 220, 132, 0.35);
+    background: rgba(61, 220, 132, 0.07);
+    color: #b5f0cc;
+}
+
+.notice--error {
+    border-color: rgba(255, 92, 108, 0.4);
+    background: rgba(255, 92, 108, 0.08);
+    color: #ffc2c8;
+}
+
+/* ==========================================================================
+   RESPONSIVO
+   ========================================================================== */
+
+@media (max-width: 860px) {
+    .auth-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-brand {
+        padding: 28px 16px 20px;
+    }
+
+    .auth-logo {
+        width: min(70%, 300px);
+    }
+
+    .auth-tagline {
+        font-size: 1rem;
+    }
+
+    .auth-panel {
+        align-items: flex-start;
+        padding: 32px 16px 48px;
+        border-top: 1px solid var(--line);
+        border-left: 0;
+    }
+
+    .auth-title {
+        font-size: 2.1rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+    }
+}
